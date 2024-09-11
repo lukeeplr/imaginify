@@ -6,37 +6,37 @@ export const navLinks = [
     },
     {
       label: "Restaurar",
-      route: "/transformacoes/adicionar/restaurar",
+      route: "/transformations/add/restore",
       icon: "/assets/icons/image.svg",
     },
     {
       label: "Preencher",
-      route: "/transformacoes/adicionar/preencher",
+      route: "/transformations/add/fill",
       icon: "/assets/icons/stars.svg",
     },
     {
       label: "Remover elementos",
-      route: "/transformacoes/adicionar/remover",
+      route: "/transformations/add/remove",
       icon: "/assets/icons/scan.svg",
     },
     {
       label: "Recolorir",
-      route: "/transformacoes/adicionar/recolorir",
+      route: "/transformations/add/recolor",
       icon: "/assets/icons/filter.svg",
     },
     {
       label: "Remover fundo",
-      route: "/transformacoes/adicionar/removerFundo",
+      route: "/transformations/add/removeBackground",
       icon: "/assets/icons/camera.svg",
     },
     {
       label: "Perfil",
-      route: "/perfil",
+      route: "/profile",
       icon: "/assets/icons/profile.svg",
     },
     {
       label: "Comprar créditos",
-      route: "/creditos",
+      route: "/credits",
       icon: "/assets/icons/bag.svg",
     },
   ];
