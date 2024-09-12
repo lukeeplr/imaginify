@@ -3,9 +3,20 @@ import React from 'react'
 
 import { transformationTypes } from '@/constants'
 import TransformationFrom from '@/components/shared/TransformationFrom'
+import { auth } from '@clerk/nextjs/server'
+import { getUserById } from '@/lib/actions/user.actions'
+import { redirect } from 'next/navigation'
 
 
-function AddTransformationPage({ params: {type}}: SearchParamProps) {
+async function AddTransformationPage ({ params: {type}}: SearchParamProps) {
+
+  const { userId } = auth()
+
+  if (!userId) {
+    redirect('/entrar')
+  }
+
+  const user = await getUserById(userId)
 
   const transformation = transformationTypes[type]
 
@@ -14,7 +25,14 @@ function AddTransformationPage({ params: {type}}: SearchParamProps) {
     <Header
       title={transformation.title}
       subtitle={transformation.subTitle}  />
-    <TransformationFrom />
+    <section className='mt-10'>
+    <TransformationFrom
+      action='Add'
+      userId={user._id}
+      type={transformation.type as TransformationTypeKey}
+      creditBalance={user.creditBalance}
+      />
+    </section>
     </>
   )
 }
