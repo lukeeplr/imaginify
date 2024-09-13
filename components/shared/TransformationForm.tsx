@@ -18,12 +18,15 @@ import {
 
 import { Input } from "@/components/ui/input"
 import { CustomField } from "./CustomField"
-import { aspectRatioOptions, creditFee, transformationTypes } from "@/constants"
+import { aspectRatioOptions, creditFee, defaultValues, transformationTypes } from "@/constants"
 import { useState, useTransition } from "react"
 import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils"
 import { updateCredits } from "@/lib/actions/user.actions"
 import MediaUploader from "./MediaUploader"
 import TransformedImage from "./TransformedImage"
+import { getCldImageUrl } from "next-cloudinary"
+import { addImage, updateImage } from "@/lib/actions/image.actions"
+import { useRouter } from "next/navigation"
 
 export const formSchema = z.object({
   title: z.string().min(2).max(50),
@@ -34,7 +37,7 @@ export const formSchema = z.object({
 })
 
 
-function TransformationFrom({ action, data = null, userId, type, creditBalance, config = null }: TransformationFormProps) {
+function TransformationForm({ action, data = null, userId, type, creditBalance, config = null }: TransformationFormProps) {
 
     const transformationType = transformationTypes[type]
     const [image, setImage] = useState(data)
@@ -43,6 +46,7 @@ function TransformationFrom({ action, data = null, userId, type, creditBalance, 
     const [isTransforming, setIsTransforming] = useState(false)
     const [transformationConfig, setTransformationConfig] = useState(config)
     const [isPending, startTransition] = useTransition()
+    const router = useRouter()
 
 
     const initialValues = data && action === 'Update' ? {
@@ -51,18 +55,80 @@ function TransformationFrom({ action, data = null, userId, type, creditBalance, 
         color: data?.color,
         prompt: data?.prompt,
         publicId:data?.publicId
-    } : {
-
-    }
+    } : defaultValues
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: initialValues
       })
 
-      function onSubmit(values: z.infer<typeof formSchema>) {
-        setIsSubmitting(true)
-      }
+      async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsSubmitting(false)
+
+
+        if (data || image) {
+            const transformationURL = getCldImageUrl({
+                width: image?.width,
+                height: image?.height,
+                src: image?.publicId,
+                ...transformationConfig
+
+            })
+
+            const imageData = {
+                title: values.title,
+                publicId: image?.publicId,
+                transformationType: type,
+                width: image?.width,
+                height: image?.height,
+                config: transformationConfig,
+                secureURL: image?.secureURL,
+                transformationURL,
+                aspectRatio: values.aspectRatio,
+                prompt: values.prompt,
+                color: values.color
+            }
+
+            console.log(imageData)
+
+            if (action === 'Add') {
+                try {
+
+                    const newImage = await addImage({
+                        image: imageData,
+                        userId,
+                        path: '/'
+                    })
+
+                    if (newImage) {
+                        form.reset()
+                        setImage(data)
+                        router.push(`/transformations/${newImage._id}`)
+                    }
+
+                } catch (error) {
+                    console.log(error)
+                }
+        }
+
+            if (action === 'Update') {
+                try {
+
+                    const updatedImage = await updateImage({
+                        image: {...imageData, _id: data._id},
+                        userId,
+                        path: `/transformations/${data._id}`
+                    })
+
+                    if (updatedImage) {
+                        router.push(`/transformations/${updatedImage._id}`)
+                    }
+
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+      }}
 
       const onSelectFieldHandler = (value: string, onChangeField: (value: string) => void) => {
         const imageSize = aspectRatioOptions[value as AspectRatioKey]
@@ -230,4 +296,4 @@ function TransformationFrom({ action, data = null, userId, type, creditBalance, 
       )
 }
 
-export default TransformationFrom
+export default TransformationForm
