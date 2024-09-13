@@ -39,7 +39,7 @@ function TransformedImage({image, type, title, transformationConfig, isTransform
                     width={getImageSize(type, image, 'width')}
                     height={getImageSize(type, image, 'height')}
                     src={image?.publicId}
-                    alt={image.title}
+                    alt={title}
                     sizes={'(max-width: 767px) 100vw, 50vw'}
                     placeholder={dataUrl as PlaceholderValue}
                     className='transformed-image'
