@@ -48,10 +48,10 @@ export const plans = [
       name: "Grátis",
       icon: "/assets/icons/free-plan.svg",
       price: 0,
-      credits: 10,
+      credits: 5,
       inclusions: [
         {
-          label: "10 créditos",
+          label: "5 créditos",
           isIncluded: true,
         },
         {
@@ -70,7 +70,7 @@ export const plans = [
     },
     {
       _id: 2,
-      name: "Pro",
+      name: "Plus",
       icon: "/assets/icons/free-plan.svg",
       price: 19.90,
       credits: 120,
@@ -85,7 +85,7 @@ export const plans = [
         },
         {
           label: "Suporte prioritário",
-          isIncluded: true,
+          isIncluded: false,
         },
         {
           label: "Atualizações prioritárias",
@@ -95,7 +95,7 @@ export const plans = [
     },
     {
       _id: 3,
-      name: "Premium",
+      name: "Ultra",
       icon: "/assets/icons/free-plan.svg",
       price: 99.90,
       credits: 2000,
