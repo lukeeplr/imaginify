@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { CustomField } from "./CustomField"
 import { aspectRatioOptions, creditFee, defaultValues, transformationTypes } from "@/constants"
-import { useState, useTransition } from "react"
+import { useEffect, useState, useTransition } from "react"
 import { AspectRatioKey, debounce, deepMergeObjects } from "@/lib/utils"
 import { updateCredits } from "@/lib/actions/user.actions"
 import MediaUploader from "./MediaUploader"
@@ -27,6 +27,7 @@ import TransformedImage from "./TransformedImage"
 import { getCldImageUrl } from "next-cloudinary"
 import { addImage, updateImage } from "@/lib/actions/image.actions"
 import { useRouter } from "next/navigation"
+import { InsufficientCreditsModal } from "./InsufficientCreditsModal"
 
 export const formSchema = z.object({
   title: z.string().min(2).max(50),
@@ -88,8 +89,6 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                 prompt: values.prompt,
                 color: values.color
             }
-
-            console.log(imageData)
 
             if (action === 'Add') {
                 try {
@@ -157,7 +156,9 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                     [fieldName === 'prompt' ? 'prompt' : 'to']: value
                 }
             }))
-        }, 1000)
+        }, 1000)()
+
+        return onChangeField(value)
       }
 
 
@@ -172,9 +173,18 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
         })
       }
 
+      useEffect(() => {
+        if (image && (type === 'restore' || type === 'removeBackground')) {
+            setNewTransformation(transformationType.config)
+        }
+      }, [image, transformationType.config, type])
+
       return (
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            {creditBalance < Math.abs(creditFee) && (
+                <InsufficientCreditsModal />
+            )}
             <CustomField
                 control={form.control}
                 name="title"
@@ -191,7 +201,9 @@ function TransformationForm({ action, data = null, userId, type, creditBalance, 
                     className="w-full"
                     render={({ field }) => (
                         <Select
-                            onValueChange={(value) => onSelectFieldHandler(value, field.onChange)}>
+                            onValueChange={(value) => onSelectFieldHandler(value, field.onChange)}
+                            value={field.value}
+                            >
                         <SelectTrigger className="select-field">
                             <SelectValue placeholder="Escolha a proporção" />
                         </SelectTrigger>
